@@ -10,12 +10,35 @@ const isValid = (username)=>{ //returns boolean
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
-//write code to check if username and password match the one we have in records.
+    const tempUser = users.filter((user) => {
+        return (user.username === username && user.password === password);
+    });
+
+    return (tempUser.length == 1);    
 }
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
+  const username = req.body.username;
+  const password = req.body.password;
+
+  if (!username || !password){
+    res.status(404).json({error: "user or password are not correct"});
+  }
+
+    //auth user
+    if (authenticatedUser(username, password)){
+        //token
+        let accToken = jwt.sign({ data: password }, 'access_customer', { expiresIn: 60 * 60 });
+
+        req.session.authorization = { accToken, username };
+        return res.status(200).json({ message: "Login successfull" });
+    } else {
+        return res.status(404).json({error: "user or password are not correct"});
+    }
+
+
+    //Write your code here
   return res.status(300).json({message: "Yet to be implemented"});
 });
 
