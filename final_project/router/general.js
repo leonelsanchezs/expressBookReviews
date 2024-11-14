@@ -18,12 +18,6 @@ const doesExist = (username) => {
     }
 }
 
-let getAllBooks = new Promise((resolve,reject) => {
-    setTimeout(() => {
-      resolve(JSON.stringify({books: books}, null, 4))
-    },500)});
-
-
 public_users.post("/register", (req,res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -44,22 +38,28 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',async function (req, res) {
-    getAllBooks.then((response)=> res.status(200).json(response));
+    const axiosBooks = await axios.get('https://leonelsanche-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/static/books.json'); 
+    
+    res.status(200).json(JSON.stringify(axiosBooks.data));
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
+public_users.get('/isbn/:isbn', async function (req, res) {
     const isbn = req.params.isbn;
-    const data = JSON.stringify({book: books[isbn]}, null, 4);
+    const axiosBooks = await axios.get('https://leonelsanche-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/static/books.json'); 
+    
+    const data = JSON.stringify({book: axiosBooks.data[isbn]}, null, 4);
     return res.status(200).json(data);  
  });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
     const author = req.params.author;
+    const axiosBooks = await axios.get('https://leonelsanche-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/static/books.json'); 
+    
     let booksByAuthor = [];
     Object.keys(books).forEach(function(key) {
-        const val = books[key];
+        const val = axiosBooks.data[key];
         if (val.author == author){
             booksByAuthor.push(val);
         }        
@@ -69,11 +69,13 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+public_users.get('/title/:title', async function (req, res) {
   const title = req.params.title;
   let booksByTitle = [];
-  Object.keys(books).forEach(function(key) {
-    const val = books[key];
+  const axiosBooks = await axios.get('https://leonelsanche-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/static/books.json'); 
+    
+  Object.keys(axiosBooks.data).forEach(function(key) {
+    const val = axiosBooks.data[key];
     if (val.title == title){
         booksByTitle.push(val);
     }        
